@@ -1,0 +1,35 @@
+// Подключение библиотек для I2C и LCD
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+// Адрес модуля I2C (0x27), 16 символов, 2 строки
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+// Фраза для вывода (латиница — поддерживается LCD)
+const String phrase = "privet che kak dela";
+int charIndex = 0;          // Текущая позиция в строке
+bool completed = false;     // Флаг завершения вывода
+
+void setup() {
+  lcd.init();               // Инициализация LCD
+  lcd.backlight();          // Включить подсветку
+  lcd.clear();              // Очистка экрана от случайных данных
+  lcd.setCursor(0, 0);      // Курсор в начало первой строки
+}
+
+void loop() {
+  if (!completed) {
+    // Вывод очередного символа
+    lcd.print(phrase[charIndex]);
+    charIndex++;
+    if (charIndex >= phrase.length()) {
+      completed = true;     // Вывод завершён
+    }
+    delay(1000);            // Пауза 1 секунда между символами
+  } else {
+    // После завершения переходим в режим энергосбережения
+    while (1) {
+      delay(1000);          // Бесконечное ожидание с минимальным потреблением
+    }
+  }
+}
