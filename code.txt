@@ -1,42 +1,42 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <DHT.h>
 
-const int LCD_COLS = 16;
-const int LCD_ROWS = 2;
-const int MAX_CHARS = LCD_COLS * LCD_ROWS;
+#define DHTPIN 2
+#define DHTTYPE DHT11
 
-LiquidCrystal_I2C lcd(0x27, LCD_COLS, LCD_ROWS);
-
-const String phrase = "privet nu che kak dela";
-const int phraseLen = phrase.length();
-
-int charIndex = 0;
-bool completed = false;
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+DHT dht(DHTPIN, DHTTYPE);
 
 void setup() {
-  lcd.init();
+  lcd.begin(16, 2);
   lcd.backlight();
-  lcd.clear();
-  lcd.setCursor(0, 0);
+  dht.begin();
 }
 
 void loop() {
-  if (completed || phraseLen == 0) {
-    return;
+  lcd.clear();
+
+  float t = dht.readTemperature();
+  float h = dht.readHumidity();
+
+  lcd.setCursor(0, 0);
+  if (isnan(t)) {
+    lcd.print("T: Error   ");
+  } else {
+    lcd.print("T: ");
+    lcd.print(t, 1);
+    lcd.print(" C");
   }
 
-  if (charIndex >= phraseLen || charIndex >= MAX_CHARS) {
-    completed = true;
-    return;
+  lcd.setCursor(0, 1);
+  if (isnan(h)) {
+    lcd.print("H: Error   ");
+  } else {
+    lcd.print("H: ");
+    lcd.print(h, 1);
+    lcd.print(" %");
   }
 
-  int row = (charIndex < LCD_COLS) ? 0 : 1;
-  int col = charIndex % LCD_COLS;
-
-  lcd.setCursor(col, row);
-  lcd.print(phrase[charIndex]);
-
-  charIndex++;
-
-  delay(1000);
+  delay(2000);
 }
